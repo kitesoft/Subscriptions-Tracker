@@ -55,3 +55,34 @@ flutter:
   #
   # For details regarding fonts from package dependencies, 
   # see https://flutter.io/custom-fonts/#from-packages
+
+  fonts:
+    - family: VarelaRound
+      fonts:
+      - asset: assets/fonts/VarelaRound/VarelaRound-Regular.ttf
+    - family: ProductSans
+      fonts:
+      - asset: assets/fonts/ProductSans/ProductSans-Regular.ttf
+      - asset: assets/fonts/ProductSans/ProductSans-Italic.ttf
+        style: italic
+      - asset: assets/fonts/ProductSans/ProductSans-Bold.ttf
+        weight: 700
+      - asset: assets/fonts/ProductSans/ProductSans-Bold-Italic.ttf
+        weight: 700
+        style: italic
+    - family: FontAwesomeRegular
+      fonts:
+        - asset: assets/fonts/FontAwesome/fa-regular-400.ttf
+          weight: 400
+    - family: FontAwesomeSolid
+      fonts:
+        - asset: assets/fonts/FontAwesome/fa-solid-900.ttf
+          weight: 900
+    - family: FontAwesomeLight
+      fonts:
+        - asset: assets/fonts/FontAwesome/fa-light-300.ttf
+          weight: 300
+    - family: FontAwesomeBrands
+      fonts:
+        - asset: assets/fonts/FontAwesome/fa-brands-400.ttf
+          weight: 400
