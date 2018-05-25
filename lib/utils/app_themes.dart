@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:subscriptions_tracker/utils/app_color_palettes.dart';
+import 'package:subscriptions_tracker/utils/app_color_palette.dart';
 
 class AppThemes {
   String themeName;
@@ -20,7 +20,7 @@ class AppThemes {
         iconTheme: new IconThemeData(color: Colors.black),
         primaryIconTheme: new IconThemeData(color: AppColorPalette.grey),
         canvasColor: Colors.white,
-        primaryTextTheme: Theme
+        /*primaryTextTheme: Theme
             .of(context)
             .primaryTextTheme
             .copyWith(
@@ -28,7 +28,7 @@ class AppThemes {
               body1: new TextStyle(color: AppColorPalette.darkGrey),
               subhead: new TextStyle(color: Colors.white),
             )
-            .apply(),
+            .apply(),*/
         primaryColor: AppColorPalette.lightGrey,
         primaryColorLight: AppColorPalette.grey,
         primaryColorDark: AppColorPalette.grey,

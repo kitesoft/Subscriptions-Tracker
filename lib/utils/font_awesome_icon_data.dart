@@ -13,6 +13,8 @@ abstract class FontAwesomeIcons {
   static const IconData angle_up = const _IconDataLight(0xf106);
   static const IconData angle_down = const _IconDataLight(0xf107);
   static const IconData user_cog = const _IconDataRegular(0xf4fe);
+  static const IconData sign_in_alt = const _IconDataRegular(0xf2f6);
+  static const IconData sign_out_alt = const _IconDataRegular(0xf2f5);
 }
 
 class _IconDataBrands extends IconData {

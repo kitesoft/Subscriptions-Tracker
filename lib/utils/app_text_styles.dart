@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:subscriptions_tracker/utils/app_color_palettes.dart';
+import 'package:subscriptions_tracker/utils/app_color_palette.dart';
 
 abstract class AppTextStyles {
   // Main Screen
@@ -13,7 +13,11 @@ abstract class AppTextStyles {
       fontFamily: 'VarelaRound', fontWeight: FontWeight.w400, fontSize: 16.0);
 
   // Drawer
-  //static TextStyle drawerItemAvatar = new TextStyle(color: Theme.of(context).scaffoldBackgroundColor);
-
   static TextStyle drawerItem = new TextStyle(color: Colors.black);
+
+  static TextStyle drawerAccountName =
+      new TextStyle(fontWeight: FontWeight.w700, color: Colors.black);
+
+  static TextStyle drawerAccountEmail = new TextStyle(
+      fontWeight: FontWeight.w400, color: AppColorPalette.darkGrey);
 }

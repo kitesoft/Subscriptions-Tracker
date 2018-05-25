@@ -1,4 +1,6 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:subscriptions_tracker/utils/app_authentication.dart';
 import 'package:subscriptions_tracker/utils/app_text_styles.dart';
 import 'package:subscriptions_tracker/utils/app_themes.dart';
 import 'package:subscriptions_tracker/utils/font_awesome_icon_data.dart';
@@ -35,6 +37,9 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   bool _showDrawerContents = true;
   // End of Drawer fields
 
+  AppAuthentication auth = new AppAuthentication();
+  FirebaseUser currentUser;
+
   void initState() {
     super.initState();
 
@@ -53,6 +58,13 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
       parent: _controller,
       curve: Curves.fastOutSlowIn,
     ));
+
+    // Listen for our auth event (on reload or start)
+    auth.firebaseAuth.onAuthStateChanged.listen((user) {
+      setState(() {
+        currentUser = user;
+      });
+    });
   }
 
   @override
@@ -100,10 +112,16 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                 ],
               ),
             ),
+            new Text("User: "),
+            currentUser != null
+                ? new Text('YES! ${currentUser.displayName}')
+                : new Text('NO!'),
+            new RaisedButton(onPressed: auth.signInWithGoogle),
+            new RaisedButton(onPressed: auth.signOutWithGoogle),
           ],
         ),
       ),
-      drawer: mainDrawer(context, _scaffoldKey, _controller,
+      drawer: mainDrawer(context, _scaffoldKey, auth, currentUser, _controller,
           _drawerContentsOpacity, _drawerDetailsPosition, _showDrawerContents),
       bottomNavigationBar: new BottomAppBar(
         hasNotch: false,
