@@ -11,7 +11,7 @@ dependencies:
 
   # Auth plugins
   firebase_auth: ^0.5.10
-  google_sign_in: ^3.0.3+1
+  google_sign_in:  ^3.0.3+1
 
 dev_dependencies:
   flutter_test:

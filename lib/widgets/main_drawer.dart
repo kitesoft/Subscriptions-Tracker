@@ -178,7 +178,9 @@ Widget mainDrawer(
                               leading:
                                   const Icon(FontAwesomeIcons.sign_out_alt),
                               title: const Text('Sign out'),
-                              onTap: _showNotImplementedMessage,
+                              onTap: () {
+                                auth.signOutWithGoogle();
+                              },
                             ),
                           ],
                         ),
