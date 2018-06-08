@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:subscriptions_tracker/models/subscription.dart';
 import 'package:subscriptions_tracker/utils/app_authentication.dart';
 import 'package:subscriptions_tracker/utils/app_color_palette.dart';
 import 'package:subscriptions_tracker/utils/app_text_styles.dart';
@@ -7,7 +8,6 @@ import 'package:subscriptions_tracker/utils/app_themes.dart';
 import 'package:subscriptions_tracker/utils/font_awesome_icon_data.dart';
 import 'package:subscriptions_tracker/utils/helper_functions.dart';
 import 'package:subscriptions_tracker/widgets/auth_drawer_header.dart';
-import 'package:subscriptions_tracker/widgets/main_drawer.dart';
 
 void main() => runApp(new MainApp());
 
@@ -88,6 +88,37 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     'E',
   ];
 
+  List<Subscription> subs = [
+    new Subscription(new DateTime(2017, 10, 3), Colors.red, 'Netflix',
+        new Duration(days: 30), 49.99),
+    new Subscription(new DateTime(2018, 3, 23), Colors.green, 'Spotify',
+        new Duration(days: 30), 25.99),
+    new Subscription(new DateTime(2017, 10, 3), Colors.red, 'Netflix',
+        new Duration(days: 30), 49.99),
+    new Subscription(new DateTime(2018, 3, 23), Colors.green, 'Spotify',
+        new Duration(days: 30), 25.99),
+    new Subscription(new DateTime(2017, 10, 3), Colors.red, 'Netflix',
+        new Duration(days: 30), 49.99),
+    new Subscription(new DateTime(2018, 3, 23), Colors.green, 'Spotify',
+        new Duration(days: 30), 25.99),
+    new Subscription(new DateTime(2017, 10, 3), Colors.red, 'Netflix',
+        new Duration(days: 30), 49.99),
+    new Subscription(new DateTime(2018, 3, 23), Colors.green, 'Spotify',
+        new Duration(days: 30), 25.99),
+    new Subscription(new DateTime(2017, 10, 3), Colors.red, 'Netflix',
+        new Duration(days: 30), 49.99),
+    new Subscription(new DateTime(2018, 3, 23), Colors.green, 'Spotify',
+        new Duration(days: 30), 25.99),
+    new Subscription(new DateTime(2017, 10, 3), Colors.red, 'Netflix',
+        new Duration(days: 30), 49.99),
+    new Subscription(new DateTime(2018, 3, 23), Colors.green, 'Spotify',
+        new Duration(days: 30), 25.99),
+    new Subscription(new DateTime(2017, 10, 3), Colors.red, 'Netflix',
+        new Duration(days: 30), 49.99),
+    new Subscription(new DateTime(2018, 3, 23), Colors.green, 'Spotify',
+        new Duration(days: 30), 25.99),
+  ];
+
   void _showNotImplementedMessage(GlobalKey<ScaffoldState> scaffoldKey) {
     HelperFunctions.showInSnackBar(
         scaffoldKey, 'The drawer\'s items don\'t do anything');
@@ -129,12 +160,31 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                 ],
               ),
             ),
-            new Text("User: "),
-            currentUser != null
-                ? new Text('YES! ${currentUser.displayName}')
-                : new Text('NO!'),
-            new RaisedButton(onPressed: auth.signInWithGoogle),
-            new RaisedButton(onPressed: auth.signOutWithGoogle),
+            new Expanded(
+                child: new ListView.builder(
+                    itemCount: subs.length,
+                    itemBuilder: (context, index) {
+                      return new ListTile(
+                        isThreeLine: true,
+                        leading: new CircleAvatar(
+                            backgroundColor: subs[index].color,
+                            child: new Text(
+                              subs[index].name[0],
+                              style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 20.0),
+                            )),
+                        title: new Text(
+                          subs[index].name,
+                          style: AppTextStyles.drawerItem,
+                        ),
+                        subtitle: new Text(
+                            'Started on ${HelperFunctions.dateFormatDMY(subs[index].dateOfCreation)}\nPayment every ${subs[index].period.inDays} days'),
+                        trailing: new Text('\$${subs[index].fee}'),
+                        onTap: () {},
+                      );
+                    })),
           ],
         ),
       ),

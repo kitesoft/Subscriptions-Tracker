@@ -6,4 +6,8 @@ abstract class HelperFunctions {
     scaffoldKey.currentState
         .showSnackBar(new SnackBar(content: new Text(value)));
   }
+
+  static String dateFormatDMY(DateTime date) {
+    return '${date.day}/${date.month}/${date.year}';
+  }
 }
