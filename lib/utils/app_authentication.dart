@@ -2,12 +2,14 @@ import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AppAuthentication {
   final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = new GoogleSignIn();
 
-  Future<FirebaseUser> signInWithGoogle() async {
+  Future<FirebaseUser> signInWithGoogle(
+      Future<SharedPreferences> _sPrefs) async {
     // Attempt to get the currently authenticated user
     GoogleSignInAccount currentUser = _googleSignIn.currentUser;
     if (currentUser == null) {
@@ -29,6 +31,9 @@ class AppAuthentication {
 
     assert(user != null);
     assert(!user.isAnonymous);
+
+    final SharedPreferences prefs = await _sPrefs;
+    prefs.setString('userUID', user.uid);
 
     return user;
   }

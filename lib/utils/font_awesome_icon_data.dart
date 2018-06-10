@@ -4,7 +4,8 @@ import 'package:flutter/widgets.dart';
 
 abstract class FontAwesomeIcons {
   // Main Screen
-  static const IconData search = const _IconDataRegular(0xf002);
+  static const IconData filter = const _IconDataRegular(0xf0b0);
+  static const IconData check_circle = const _IconDataSolid(0xf058);
   static const IconData plus = const _IconDataRegular(0xf067);
   static const IconData bars = const _IconDataRegular(0xf0c9);
   static const IconData ellipsis_v = const _IconDataRegular(0xf142);

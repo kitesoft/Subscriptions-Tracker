@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:subscriptions_tracker/models/subscription.dart';
@@ -8,6 +10,10 @@ import 'package:subscriptions_tracker/utils/app_themes.dart';
 import 'package:subscriptions_tracker/utils/font_awesome_icon_data.dart';
 import 'package:subscriptions_tracker/utils/helper_functions.dart';
 import 'package:subscriptions_tracker/widgets/auth_drawer_header.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:subscriptions_tracker/widgets/subscription_list_tile.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 void main() => runApp(new MainApp());
 
@@ -31,6 +37,8 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+  Future<SharedPreferences> _sPrefs = SharedPreferences.getInstance();
+  String _userUID;
 
   // Drawer fields
   AnimationController _controller;
@@ -41,6 +49,9 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
 
   AppAuthentication auth = new AppAuthentication();
   FirebaseUser currentUser;
+
+  // Filter fields
+  String _filterName = '';
 
   void initState() {
     super.initState();
@@ -61,10 +72,17 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
       curve: Curves.fastOutSlowIn,
     ));
 
+    // Get last user UID from shared preferences
+    getUserUID();
+
     // Listen for our auth event (on reload or start)
     auth.firebaseAuth.onAuthStateChanged.listen((user) {
       setState(() {
         currentUser = user;
+
+        if (currentUser != null) {
+          _userUID = currentUser.uid;
+        }
       });
     });
   }
@@ -74,6 +92,23 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     _controller.dispose();
 
     super.dispose();
+  }
+
+  Future<Null> getUserUID() async {
+    final SharedPreferences prefs = await _sPrefs;
+    setState(() {
+      _userUID = prefs.getString('userUID');
+    });
+  }
+
+  Future<Null> clearUserUID() async {
+    final SharedPreferences prefs = await _sPrefs;
+
+    prefs.setString('userUID', '');
+
+    setState(() {
+      _userUID = '';
+    });
   }
 
   void _popupMenuSelection(String value) {
@@ -150,41 +185,58 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                     style: AppTextStyles.mainScreenTitle,
                   ),
                   new IconButton(
-                    icon: new Icon(
-                      FontAwesomeIcons.search,
-                      color: Theme.of(context).primaryIconTheme.color,
-                      size: 30.0,
+                    icon: new Stack(
+                      alignment: Alignment.bottomRight,
+                      children: <Widget>[
+                        new Icon(
+                          FontAwesomeIcons.filter,
+                          color: Theme.of(context).primaryIconTheme.color,
+                          size: 30.0,
+                        ),
+                        _filterName == ''
+                            ? new Container()
+                            : new Icon(
+                                FontAwesomeIcons.check_circle,
+                                color: AppColorPalette.red,
+                                size: 15.0,
+                              ),
+                      ],
                     ),
-                    onPressed: () {},
+                    onPressed: () {
+                      _filterName == ''
+                          ? setState(() {
+                              _filterName = 'Spotify';
+                            })
+                          : setState(() {
+                              _filterName = '';
+                            });
+                    },
                   )
                 ],
               ),
             ),
             new Expanded(
-                child: new ListView.builder(
-                    itemCount: subs.length,
-                    itemBuilder: (context, index) {
-                      return new ListTile(
-                        isThreeLine: true,
-                        leading: new CircleAvatar(
-                            backgroundColor: subs[index].color,
-                            child: new Text(
-                              subs[index].name[0],
-                              style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 20.0),
-                            )),
-                        title: new Text(
-                          subs[index].name,
-                          style: AppTextStyles.drawerItem,
-                        ),
-                        subtitle: new Text(
-                            'Started on ${HelperFunctions.dateFormatDMY(subs[index].dateOfCreation)}\nPayment every ${subs[index].period.inDays} days'),
-                        trailing: new Text('\$${subs[index].fee}'),
-                        onTap: () {},
-                      );
-                    })),
+                child: new StreamBuilder(
+              stream: Firestore.instance
+                  .collection('subscriptions')
+                  .where('uid', isEqualTo: _userUID)
+                  .orderBy('dateOfCreation', descending: true)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return const Text('Loading...');
+                } else {
+                  return ListView.builder(
+                      itemCount: snapshot.data.documents.length,
+                      itemBuilder: (context, index) {
+                        Subscription sub =
+                            new Subscription.fromFirestoreDocument(
+                                snapshot.data.documents[index]);
+                        return new SubscriptionListTile(subscription: sub);
+                      });
+                }
+              },
+            )),
           ],
         ),
       ),
@@ -202,9 +254,9 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                       style: AppTextStyles.drawerAccountEmail,
                     ),
                     currentAccountPicture: new CircleAvatar(
-                      backgroundColor: AppColorPalette.darkGrey,
-                      backgroundImage: new NetworkImage(currentUser.photoUrl),
-                    ),
+                        backgroundColor: AppColorPalette.darkGrey,
+                        backgroundImage: new CachedNetworkImageProvider(
+                            currentUser.photoUrl)),
                     //TODO: remove other accounts or implement
 /*          otherAccountsPictures: <Widget>[
             new GestureDetector(
@@ -253,7 +305,10 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                         new Column(
                           children: <Widget>[
                             new Text('Please login'),
-                            new RaisedButton(onPressed: auth.signInWithGoogle)
+                            new RaisedButton(onPressed: () {
+                              auth.signInWithGoogle(_sPrefs);
+                              Navigator.pop(context);
+                            })
                           ],
                         )
                       ],
@@ -333,6 +388,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                                           currentUser.displayName +
                                               ' Signed out');
                                       auth.signOutWithGoogle();
+                                      clearUserUID();
                                       _showDrawerContents = true;
                                       _controller.reverse();
                                     });
