@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:subscriptions_tracker/models/subscription.dart';
@@ -14,6 +13,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:subscriptions_tracker/widgets/subscription_list_tile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:connectivity/connectivity.dart';
 
 void main() => runApp(new MainApp());
 
@@ -39,6 +39,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   Future<SharedPreferences> _sPrefs = SharedPreferences.getInstance();
   String _userUID;
+  bool _connected = true;
 
   // Drawer fields
   AnimationController _controller;
@@ -49,6 +50,8 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
 
   AppAuthentication auth = new AppAuthentication();
   FirebaseUser currentUser;
+
+  StreamSubscription<ConnectivityResult> connectivityStatus;
 
   // Filter fields
   String _filterName = '';
@@ -85,11 +88,19 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
         }
       });
     });
+
+    connectivityStatus = new Connectivity()
+        .onConnectivityChanged
+        .listen((ConnectivityResult result) {
+      // Got a new connectivity status!
+      _connectivityChange(result);
+    });
   }
 
   @override
   void dispose() {
     _controller.dispose();
+    connectivityStatus.cancel();
 
     super.dispose();
   }
@@ -113,6 +124,20 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
 
   void _popupMenuSelection(String value) {
     HelperFunctions.showInSnackBar(_scaffoldKey, 'You selected: $value');
+  }
+
+  void _connectivityChange(ConnectivityResult status) async {
+    if (status == ConnectivityResult.none) {
+      // No connectivity.
+      setState(() {
+        _connected = false;
+      });
+    } else {
+      // Connected.
+      setState(() {
+        _connected = true;
+      });
+    }
   }
 
   List<String> _drawerContents = const <String>[
@@ -216,27 +241,68 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
               ),
             ),
             new Expanded(
-                child: new StreamBuilder(
-              stream: Firestore.instance
-                  .collection('subscriptions')
-                  .where('uid', isEqualTo: _userUID)
-                  .orderBy('dateOfCreation', descending: true)
-                  .snapshots(),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) {
-                  return const Text('Loading...');
-                } else {
-                  return ListView.builder(
-                      itemCount: snapshot.data.documents.length,
-                      itemBuilder: (context, index) {
-                        Subscription sub =
-                            new Subscription.fromFirestoreDocument(
-                                snapshot.data.documents[index]);
-                        return new SubscriptionListTile(subscription: sub);
-                      });
-                }
-              },
-            )),
+                child: _connected
+                    ? new StreamBuilder(
+                        stream: Firestore.instance
+                            .collection('subscriptions')
+                            .where('uid', isEqualTo: _userUID)
+                            .orderBy('dateOfCreation', descending: true)
+                            .snapshots(),
+                        builder: (context, snapshot) {
+                          if (!snapshot.hasData) {
+                            return new Column(
+                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: <Widget>[
+                                new Container(
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 5.0,
+                                  ),
+                                  padding: new EdgeInsets.only(
+                                      top: 100.0, bottom: 20.0),
+                                ),
+                                new Text(
+                                  'Loading...',
+                                )
+                              ],
+                            );
+                          } else {
+                            return ListView.builder(
+                                itemCount: snapshot.data.documents.length,
+                                itemBuilder: (context, index) {
+                                  Subscription sub =
+                                      new Subscription.fromFirestoreDocument(
+                                          snapshot.data.documents[index]);
+                                  return new SubscriptionListTile(
+                                      subscription: sub);
+                                });
+                          }
+                        },
+                      )
+                    : new Container(
+                        padding: new EdgeInsets.only(top: 100.0, bottom: 200.0),
+                        child: new Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: <Widget>[
+                            new Icon(
+                              FontAwesomeIcons.exclamation_triangle,
+                              size: 100.0,
+                            ),
+                            new Text(
+                              'Device Offline',
+                              style:
+                                  AppTextStyles.mainScreenNoConnectivityTitle,
+                            ),
+                            new Text(
+                              'Please check your phone\'s connectivity.',
+                              style: AppTextStyles
+                                  .mainScreenNoConnectivitySubtitle,
+                              maxLines: 2,
+                              overflow: TextOverflow.clip,
+                            ),
+                          ],
+                        ),
+                      )),
           ],
         ),
       ),
@@ -439,19 +505,21 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
           ],
         ),
       ),
-      floatingActionButton: new FloatingActionButton.extended(
-        elevation: 10.0,
-        onPressed: () {},
-        tooltip: 'Add subscription',
-        label: new Text(
-          'Add Subscription',
-          style: AppTextStyles.addSubscriptionButton,
-        ),
-        icon: new Icon(
-          FontAwesomeIcons.plus,
-          size: AppTextStyles.addSubscriptionButton.fontSize + 2.0,
-        ),
-      ),
+      floatingActionButton: _connected
+          ? new FloatingActionButton.extended(
+              elevation: 10.0,
+              onPressed: () {},
+              tooltip: 'Add subscription',
+              label: new Text(
+                'Add Subscription',
+                style: AppTextStyles.addSubscriptionButton,
+              ),
+              icon: new Icon(
+                FontAwesomeIcons.plus,
+                size: AppTextStyles.addSubscriptionButton.fontSize + 2.0,
+              ),
+            )
+          : new Container(),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }

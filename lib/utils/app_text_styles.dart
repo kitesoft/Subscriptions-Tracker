@@ -9,6 +9,18 @@ abstract class AppTextStyles {
       fontSize: 40.0,
       color: Colors.black);
 
+  static TextStyle mainScreenNoConnectivityTitle = new TextStyle(
+      fontFamily: 'ProductSans',
+      fontWeight: FontWeight.w700,
+      fontSize: 40.0,
+      color: Colors.black);
+
+  static TextStyle mainScreenNoConnectivitySubtitle = new TextStyle(
+      fontFamily: 'ProductSans',
+      fontWeight: FontWeight.w400,
+      fontSize: 20.0,
+      color: Colors.black);
+
   static TextStyle addSubscriptionButton = new TextStyle(
       fontFamily: 'VarelaRound', fontWeight: FontWeight.w400, fontSize: 16.0);
 

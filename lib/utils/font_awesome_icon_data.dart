@@ -6,6 +6,7 @@ abstract class FontAwesomeIcons {
   // Main Screen
   static const IconData filter = const _IconDataRegular(0xf0b0);
   static const IconData check_circle = const _IconDataSolid(0xf058);
+  static const IconData exclamation_triangle = const _IconDataRegular(0xf071);
   static const IconData plus = const _IconDataRegular(0xf067);
   static const IconData bars = const _IconDataRegular(0xf0c9);
   static const IconData ellipsis_v = const _IconDataRegular(0xf142);

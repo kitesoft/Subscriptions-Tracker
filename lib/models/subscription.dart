@@ -16,6 +16,6 @@ class Subscription {
     this.color = new Color(int.parse('0x' + document['color']));
     this.name = document['name'];
     this.period = new Duration(days: document['period']);
-    this.fee = document['fee'];
+    this.fee = double.parse(document['fee'].toString());
   }
 }
