@@ -29,7 +29,7 @@ class AppThemes {
               subhead: new TextStyle(color: Colors.white),
             )
             .apply(),*/
-          primaryColor: AppColorPalette.lightGrey,
+          primaryColor: AppColorPalette.red,
           primaryColorLight: AppColorPalette.grey,
           primaryColorDark: AppColorPalette.grey,
           accentIconTheme: new IconThemeData(color: Colors.white),

@@ -8,6 +8,7 @@ import 'package:subscriptions_tracker/utils/app_text_styles.dart';
 import 'package:subscriptions_tracker/utils/app_themes.dart';
 import 'package:subscriptions_tracker/utils/font_awesome_icon_data.dart';
 import 'package:subscriptions_tracker/utils/helper_functions.dart';
+import 'package:subscriptions_tracker/widgets/add_subscription_dialog.dart';
 import 'package:subscriptions_tracker/widgets/auth_drawer_header.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:subscriptions_tracker/widgets/subscription_list_tile.dart';
@@ -148,7 +149,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     'E',
   ];
 
-  List<Subscription> subs = [
+/*  List<Subscription> subs = [
     new Subscription(new DateTime(2017, 10, 3), Colors.red, 'Netflix',
         new Duration(days: 30), 49.99),
     new Subscription(new DateTime(2018, 3, 23), Colors.green, 'Spotify',
@@ -177,13 +178,27 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
         new Duration(days: 30), 49.99),
     new Subscription(new DateTime(2018, 3, 23), Colors.green, 'Spotify',
         new Duration(days: 30), 25.99),
-  ];
+  ];*/
 
   void _showNotImplementedMessage(GlobalKey<ScaffoldState> scaffoldKey) {
     HelperFunctions.showInSnackBar(
         scaffoldKey, 'The drawer\'s items don\'t do anything');
 
     Navigator.pop(context);
+  }
+
+  Future _openAddSubscriptionDialog() async {
+    Subscription newSubscription =
+        await Navigator.of(context).push(new MaterialPageRoute<Subscription>(
+            builder: (BuildContext context) {
+              return new AddSubscriptionDialog();
+            },
+            fullscreenDialog: true));
+    if (newSubscription != null) {
+      print(newSubscription.name);
+    } else {
+      print('Canceled');
+    }
   }
 
   @override
@@ -508,7 +523,9 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
       floatingActionButton: _connected
           ? new FloatingActionButton.extended(
               elevation: 10.0,
-              onPressed: () {},
+              onPressed: () {
+                _openAddSubscriptionDialog();
+              },
               tooltip: 'Add subscription',
               label: new Text(
                 'Add Subscription',

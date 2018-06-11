@@ -3,6 +3,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:subscriptions_tracker/utils/app_color_palette.dart';
 import 'package:subscriptions_tracker/utils/font_awesome_icon_data.dart';
 
 class _AccountPictures extends StatelessWidget {
@@ -313,7 +314,7 @@ class _AuthDrawerHeaderState extends State<AuthDrawerHeader> {
       child: new DrawerHeader(
         decoration: widget.decoration ??
             new BoxDecoration(
-              color: Theme.of(context).primaryColor,
+              color: AppColorPalette.lightGrey,
             ),
         margin: widget.margin,
         padding: const EdgeInsetsDirectional.only(top: 16.0, start: 16.0),

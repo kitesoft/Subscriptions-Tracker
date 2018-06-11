@@ -17,6 +17,9 @@ abstract class FontAwesomeIcons {
   static const IconData user_cog = const _IconDataRegular(0xf4fe);
   static const IconData sign_in_alt = const _IconDataRegular(0xf2f6);
   static const IconData sign_out_alt = const _IconDataRegular(0xf2f5);
+
+  // Add Subscription Dialog
+  static const IconData times = const _IconDataLight(0xf00d);
 }
 
 class _IconDataBrands extends IconData {
