@@ -2,7 +2,8 @@ import 'dart:async';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:subscriptions_tracker/models/subscription.dart';
-import 'package:subscriptions_tracker/utils/font_awesome_icon_data.dart';
+import 'package:subscriptions_tracker/utils/app_color_palette.dart';
+import 'package:subscriptions_tracker/utils/color_picker.dart';
 
 class AddSubscriptionDialog extends StatefulWidget {
   @override
@@ -10,6 +11,8 @@ class AddSubscriptionDialog extends StatefulWidget {
 }
 
 class AddSubscriptionDialogState extends State<AddSubscriptionDialog> {
+  Color _color = Colors.grey;
+  Color _fColor = Colors.white;
   String _subscriptionName;
   DateTime _fromDateTime = new DateTime.now();
   bool _allDayValue = false;
@@ -19,6 +22,12 @@ class AddSubscriptionDialogState extends State<AddSubscriptionDialog> {
 
   Future<bool> _onWillPop() async {
     _saveNeeded = _hasLocation || _hasName || _saveNeeded;
+    print('| hasLocation: ' +
+        _hasLocation.toString() +
+        '| hasName: ' +
+        _hasName.toString() +
+        '| saveNeeded: ' +
+        _saveNeeded.toString());
     if (!_saveNeeded) return true;
 
     final ThemeData theme = Theme.of(context);
@@ -50,19 +59,40 @@ class AddSubscriptionDialogState extends State<AddSubscriptionDialog> {
         false;
   }
 
+  void _colorPicker() async {
+    _color = await _colorPickerDialog();
+
+    if (_color.computeLuminance() >= 0.5) {
+      _fColor = AppColorPalette.darkGrey;
+    } else {
+      _fColor = Colors.white;
+    }
+
+    setState(() {});
+  }
+
+  Future<Color> _colorPickerDialog() async => await showDialog(
+        context: context,
+        child: new SimpleDialog(
+          title: const Text('Subscription Color'),
+          children: <Widget>[
+            new ColorPicker(
+              type: MaterialType.transparency,
+              onColor: (color) {
+                Navigator.pop(context, color);
+              },
+              currentColor: _color,
+            ),
+          ],
+        ),
+      );
+
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(
-        leading: new IconButton(
-            icon: new Icon(FontAwesomeIcons.times,
-                color: Theme.of(context).brightness == Brightness.light
-                    ? Colors.white
-                    : Colors.black),
-            onPressed: () {
-              Navigator.pop(context);
-            }),
-        title: const Text('New entry'),
+        iconTheme: Theme.of(context).iconTheme.copyWith(color: Colors.white),
+        title: const Text('New Subscription'),
         actions: [
           new FlatButton(
               onPressed: () {
@@ -85,23 +115,47 @@ class AddSubscriptionDialogState extends State<AddSubscriptionDialog> {
       body: new Form(
           onWillPop: _onWillPop,
           child: new ListView(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.only(
+                  bottom: 16.0, left: 16.0, right: 16.0, top: 8.0),
               children: <Widget>[
                 new Container(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
                     alignment: Alignment.bottomLeft,
                     child: new TextField(
                         decoration: const InputDecoration(
-                            labelText: 'Event name', filled: true),
+                            labelText: 'Subscription name', filled: true),
                         style: Theme.of(context).textTheme.headline,
                         onChanged: (String value) {
                           setState(() {
                             _hasName = value.isNotEmpty;
                             if (_hasName) {
                               _subscriptionName = value;
+                            } else {
+                              _subscriptionName = null;
                             }
                           });
                         })),
+                new Row(
+                  children: <Widget>[
+                    new Container(
+                        alignment: Alignment.center,
+                        child: new CircleAvatar(
+                          radius: 30.0,
+                          backgroundColor: _color,
+                          foregroundColor: _fColor,
+                          child: new Text(
+                            _subscriptionName == null ||
+                                    _subscriptionName.isEmpty
+                                ? '?'
+                                : _subscriptionName[0].toUpperCase(),
+                            style: new TextStyle(fontSize: 25.0),
+                          ),
+                        )),
+                    new Text('Color: '),
+                    new RaisedButton(onPressed: () {
+                      _colorPicker();
+                    }),
+                  ],
+                ),
                 new Container(
                     padding: const EdgeInsets.symmetric(vertical: 8.0),
                     alignment: Alignment.bottomLeft,
